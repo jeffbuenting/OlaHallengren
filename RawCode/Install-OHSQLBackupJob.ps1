@@ -55,7 +55,7 @@ Function Install-OHSQLBackupJob {
 
 
         Write-Verbose "Updating script with parameter data"
-        if ( $BackupDir ) { $MaintenanceSolution = $MaintenanceSolution.replace( "SET @BackupDirectory     = N'C:\Backup'","SET @BackupDirectory     = N'C:\Backup''$BackupDir'" ) }
+        if ( $BackupDir ) { $MaintenanceSolution = $MaintenanceSolution.replace( "SET @BackupDirectory     = N'C:\Backup'","SET @BackupDirectory     = N'$BackupDir'" ) }
         if ( $CleanUptime ) { $MaintenanceSolution = $MaintenanceSolution.Replace( "SET @CleanupTime         = NULL","SET @CleanupTime         = $CleanUpTime" ) }
 
         $MaintenanceSolution | Set-Content c:\temp\OLAScriptsInstall.sql 
