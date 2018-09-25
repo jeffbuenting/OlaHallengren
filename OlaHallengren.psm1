@@ -1,17 +1,8 @@
-﻿
+﻿<#
+    Powershell module to install and configure OLA Halegreen backup scripts on a SQL Server
+#>
 
-$SQLServer = 'wgpqa1-sql'
-
-#$BackupDir = "\\vaslnas.stratuslivedemo.com\SL_SQL_Backups"
-$BackupDir = "\\vaslnas.stratuslivedemo.com\SL_SQL_Backups"
-$CleanUpTime = 24
-
-$Cred = Get-Credential
-
-
-#--------------------------------------------------------------------------------
-
-
+#-------------------------------------------------------------------------------------
 
 Function Install-OHSQLBackupJob {
 
@@ -103,43 +94,10 @@ Function Install-OHSQLBackupJob {
     }    
 }
 
-
-import-module F:\GitHub\sql\sql.psd1 -force
-
-Try {
-        Foreach ( $server in $SQLServer ) {
-    
-            # ----- Install OLA Backup Scripts
-            Install-OHSQLBackupJob -SqlServer $Server -BackupDir $BackupDir -CleanupTime $CleanUpTime -Credential $Cred  -Verbose -ErrorAction Stop
-
-            # ----- Create SQL Job Schedules
-            if ( -Not ( Get-SQLSchedule -SQLInstance $Server -Name Midnight -credential $Cred -Force ) ) { New-SQLSchedule -SQLInstance $Server -Name Midnight -Frequency Daily -StartTime 000000 -Credential $Cred -Force -verbose }
-            if ( -Not ( Get-SQLSchedule -SQLInstance $Server -Name "10pm" -credential $Cred ) ) { New-SQLSchedule -SQLInstance $Server -Name "10pm" -Frequency Daily -StartTime 220000 -Credential $Cred -Force -verbose }
-            if ( -Not ( Get-SQLSchedule -SQLInstance $Server -Name "2am" -credential $Cred ) ) { New-SQLSchedule -SQLInstance $Server -Name "2am" -Frequency Daily -StartTime 020000 -Credential $Cred -force -verbose }
-            if ( -Not ( Get-SQLSchedule -SQLInstance $Server -Name "Sunday Midnight" -credential $Cred ) ) { New-SQLSchedule -SQLInstance $Server -Name "Sunday Midnight" -Frequency Weekly -FreqInterval 1 -StartTime 000000 -Credential $Cred -Force -verbose }
-
-            # ----- Assign schedule to Job
-            # ----- Misc Jobs
-            Get-SQLJob -SQLInstance $Server -Name 'sp_delete_backuphistory'  | Set-SQLJob -SQLInstance $Server -ScheduleName "Sunday Midnight" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'CommandLog Cleanup' | Set-SQLJob -SQLInstance $Server -ScheduleName "Sunday Midnight" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'sp_purge_jobhistory' | Set-SQLJob -SQLInstance $Server -ScheduleName "Sunday Midnight" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'Output File Cleanup' | Set-SQLJob -SQLInstance $Server -ScheduleName "Sunday Midnight" -AttachSchedule -Credential $Cred
-
-            # ----- Full Backups
-            Get-SQLJob -SQLInstance $Server -Name 'DatabaseBackup - USER_DATABASES - LOG' | Set-SQLJob -SQLInstance $Server -ScheduleName "Midnight" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'DatabaseBackup - USER_DATABASES - FULL' | Set-SQLJob -SQLInstance $Server -ScheduleName "Midnight" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'DatabaseBackup - SYSTEM_DATABASES - FULL' | Set-SQLJob -SQLInstance $Server -ScheduleName "Midnight" -AttachSchedule -Credential $Cred
-
-            # ----- Integrity Checks
-            Get-SQLJob -SQLInstance $Server -Name 'DatabaseIntegrityCheck - USER_DataBASES' | Set-SQLJob -SQLInstance $Server -ScheduleName "10pm" -AttachSchedule -Credential $Cred
-            Get-SQLJob -SQLInstance $Server -Name 'DatabaseIntegrityCheck - SYSTEM_DataBASES' | Set-SQLJob -SQLInstance $Server -ScheduleName "10pm" -AttachSchedule -Credential $Cred
-
-            # ----- Optimize
-            Get-SQLJob -SQLInstance $Server -Name 'IndexOptimize - USER_DATABASES' | Set-SQLJob -SQLInstance $Server -ScheduleName "2am" -AttachSchedule -Credential $Cred
-        }
-    }
-    catch {
-        Throw "Oops Error.  $($_.Exception.Message)"
-}
-
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
